@@ -5,13 +5,13 @@ import cors from "cors"
 import { sendWhatsappMessage } from "./services/twilio.js"
 import { getOpenAICompletion } from "./services/openai.js"
 
+dotenv.config()
+
 const app = express()
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(cors())
-
-dotenv.config()
 
 
 app.post('/chat/send', async (req, res) =>{
@@ -29,6 +29,8 @@ app.post('/chat/receive', async (req, res) => {
     const messageBody = twilioRequestBody.Body
     const to = twilioRequestBody.From
 
+    console.log('Incoming Twilio webhook body:', twilioRequestBody)
+
     try {
         const completion = await getOpenAICompletion(messageBody)
 
@@ -36,6 +38,7 @@ app.post('/chat/receive', async (req, res) => {
         res.status(200).json({success: true, messageBody})
 
     } catch (error) {
+        console.error('Error handling incoming message:', error)
         res.status(500).json({sucess: false, error})
     }
 
