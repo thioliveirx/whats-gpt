@@ -8,7 +8,7 @@ if (!apiKey) console.error('Missing OPENAI_API_KEY in environment')
 
 const client = new OpenAI({ apiKey })
 
-export const getOpenAICompletion = async (input: string): Promise<string> => {
+export const getOpenAICompletion = async (input: string): Promise<string | null> => {
     try {
         const completion = await client.chat.completions.create({
             model: 'gpt-4o',
@@ -17,9 +17,9 @@ export const getOpenAICompletion = async (input: string): Promise<string> => {
 
         const choice = (completion as any).choices?.[0]
         const content = choice?.message?.content ?? choice?.text ?? ''
-        return content as string
+        return content as string || null
     } catch (error: any) {
         console.error('Error completing input:', error?.message ?? error)
-        return ''
+        return null
     }
 }

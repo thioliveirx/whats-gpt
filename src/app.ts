@@ -34,12 +34,22 @@ app.post('/chat/receive', async (req, res) => {
     try {
         const completion = await getOpenAICompletion(messageBody)
 
-        await sendWhatsappMessage(to, completion)
+        const fallback = 'Desculpe, não consegui gerar uma resposta agora. Tente novamente mais tarde.'
+
+        const reply = completion && completion.trim() ? completion : fallback
+
+        await sendWhatsappMessage(to, reply)
         res.status(200).json({success: true, messageBody})
 
     } catch (error) {
         console.error('Error handling incoming message:', error)
-        res.status(500).json({sucess: false, error})
+        const fallback = 'Desculpe, ocorreu um erro no processamento da sua mensagem.'
+        try {
+            await sendWhatsappMessage(to, fallback)
+        } catch (sendErr) {
+            console.error('Failed to send fallback message:', sendErr)
+        }
+        res.status(200).json({sucess: false, error: String(error)})
     }
 
 })
